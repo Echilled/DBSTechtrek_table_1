@@ -1,7 +1,7 @@
 import React from "react";
 import InputTextBuilder from "../layout/InputTextBuilder";
 import ToggleSwitch from "../layout/ToggleSwitch";
-// import ButtonBuilder from "../components/ui/ButtonBuilder";
+import ButtonBuilder from "../layout/ButtonBuilder";
 // import { FcGoogle } from "react-icons/fc";
 import styled from "styled-components";
 import { useState, useEffect } from "react";
@@ -14,7 +14,7 @@ import {
 import ErrorIcon from "@mui/icons-material/Error";
 
 const Login = () => {
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
 
   /* API get: current user */
   const getCurrentUser = () => {
@@ -88,22 +88,22 @@ const Login = () => {
     setRemember(event.target.checked);
   };
 
-  // const handleLogin = () => {
-  //   if (username === "" || password === "") {
-  //     setFormValidation({
-  //       isInvalid: true,
-  //       message: ["Fill up all the fields"],
-  //     });
-  //   } else {
-  //     login(username, password)
-  //       .then(() => {
-  //         navigate("/");
-  //       })
-  //       .catch((error) => {
-  //         setFormValidation({ isInvalid: true, message: error });
-  //       });
-  //   }
-  // };
+  const handleLogin = () => {
+    if (username === "" || password === "") {
+      setFormValidation({
+        isInvalid: true,
+        message: ["Fill up all the fields"],
+      });
+    } else {
+      // login(username, password)
+      //   .then(() => {
+      //     navigate("/");
+      //   })
+      //   .catch((error) => {
+      //     setFormValidation({ isInvalid: true, message: error });
+      //   });
+    }
+  };
 
   return (
     <OuterContainer>
@@ -145,6 +145,41 @@ const Login = () => {
           onChange={handleSwitchChange}
         />
       </InnerContainer>
+      {/* <LinkText fontSize="12px" onClick={() => navigate("/forgotPassword")}>
+        Forgot password?
+      </LinkText> */}
+      <InnerContainer>
+        <ButtonBuilder
+          fontSize={15}
+          width={"100%"}
+          height={48}
+          buttonColor="#8E1616"
+          buttonColorHover="rgba(255, 175, 101, 0.8)"
+          label="Log In"
+          labelColor="black"
+          radius={16}
+          bold={true}
+          onClick={handleLogin}
+        />
+        {/* <TextBetweenLine>or continue with</TextBetweenLine>
+        <ButtonBuilder
+          fontSize={15}
+          width={"100%"}
+          height={48}
+          buttonColor="rgba(255, 255, 255, 1)"
+          buttonColorHover="rgba(255, 255, 255, 0.8)"
+          label="Google"
+          labelColor="black"
+          radius={16}
+          bold={true}
+          icon={<FcGoogle />}
+          onClick={handleGoogleLogin}
+        /> */}
+      </InnerContainer>
+      {/* <div>
+        <Text>Don&apos;t have a profile? </Text>
+        <LinkText onClick={() => navigate("/signup")}>Sign Up</LinkText>
+      </div> */}
     </OuterContainer>
   )
 }
@@ -156,7 +191,7 @@ const OuterContainer = styled.div`
   /* can be extracted as props in the future */
   width: 560px;
   height: 720px;
-  background: #002029;
+  background: #FFFFF;
 
   /* can be abstraacted as seperate component that extends this*/
   display: grid;
