@@ -139,8 +139,8 @@ def trades():
     data = [
         {
             "id": result.id,
-            "carbonUnitPrice": result.carbonUnitPrice,
             "companyName": result.companyName,
+            "carbonUnitPrice": result.carbonUnitPrice,
             "carbonQuantity": result.carbonQuantity,
             "createdDatetime": result.createdDatetime,
             "updatedDatetime": result.updatedDatetime
@@ -150,6 +150,48 @@ def trades():
     
     # Return the joined data
     return jsonify(data), 200
+
+# retrieve trades
+@app.route("/companytraderequest", methods=["POST"])
+def companytraderequest():
+    # Extract request data
+    companyId = request.json["companyId"]
+    
+    # Perform join query
+    result = db.session.query(
+        OutstandingRequest.id,
+        OutstandingRequest.companyId,
+        OutstandingRequest.requestorCompanyId,
+        OutstandingRequest.carbonUnitPrice,
+        OutstandingRequest.carbonQuantity,
+        OutstandingRequest.requestReason,
+        OutstandingRequest.requestStatus,
+        OutstandingRequest.requestType,
+        OutstandingRequest.createdDatetime,
+        OutstandingRequest.updatedDatetime,
+        CompanyAccount.companyName
+    ).join(CompanyAccount, OutstandingRequest.companyId == CompanyAccount.companyId).filter(
+        OutstandingRequest.companyId == companyId
+    ).first()
+
+    # Handle cases where no result is found
+    if result is None:
+        return jsonify({"error": "No data found"}), 404
+    
+    # Return the joined data
+    return jsonify({
+        "id": result.id,
+        "companyName": result.companyName,
+        "companyId": result.companyId,
+        "requestorCompanyId": result.requestorCompanyId,
+        "carbonUnitPrice": result.carbonUnitPrice,
+        "carbonQuantity": result.carbonQuantity,
+        "requestReason": result.requestReason,
+        "requestStatus": result.requestStatus,
+        "requestType": result.requestType,
+        "createdDatetime": result.createdDatetime,
+        "updatedDatetime": result.updatedDatetime
+    })
 
 # JWT version
 @app.route("/@me", methods=["POST"])
