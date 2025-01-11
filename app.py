@@ -10,7 +10,6 @@ from flask_jwt_extended import JWTManager, create_access_token, jwt_required, ge
 import mysql.connector
 import os
 from dotenv import load_dotenv
-from auth_middleware import token_required
 
 load_dotenv()
 
@@ -30,7 +29,7 @@ PASS_WORD = os.environ["PASS_WORD"]
 HOST= os.environ["HOST"]
 DB_NAME = os.environ["DB_NAME"]
 JWT_SECRET_KEY = os.environ["JWT_SECRET"]
-JWT_TOKEN_LCOATION = ['headers']
+app.config['JWT_TOKEN_LCOATION'] = ['headers', 'query_string']
 
 jwt = JWTManager(app)
 
@@ -156,22 +155,23 @@ def trades():
 
 # JWT version
 @app.route("/@me", methods=["POST"])
-#def get_current_user(current_user):
-   # return jsonify(current_user)
+@jwt_required()
+def get_current_user():
 
-    # user_id = get_jwt_identity()
+    user_id = get_jwt_identity()
+    return print(user_id)
     
-    # if not user_id:
-    #     return jsonify({"error123": "it is jumping here directly"}), 401
+    if not user_id:
+        return jsonify({"error123": "it is jumping here directly"}), 401
 
 
-    # user = User.query.filter_by(id=user_id).first()
+    user = User.query.filter_by(id=user_id).first()
     
-    # return jsonify({
-    #     "name": user.name,
-    #     "id": user.id,
-    #     "email": user.email
-    # }) 
+    return jsonify({
+        "name": user.name,
+        "id": user.id,
+        "email": user.email
+    }) 
 
 # Server-side version
 # @app.route("/@me")
