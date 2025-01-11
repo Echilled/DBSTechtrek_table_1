@@ -29,6 +29,7 @@ with app.app_context():
 def get_uuid():
     return uuid4().hex
 
+# test databse REMOVE LATER
 class User(db.Model):
     __tablename__ = "users"
     email = db.Column(db.String(345), primary_key=True, unique=True)
@@ -36,7 +37,7 @@ class User(db.Model):
     password = db.Column(db.Text, nullable=False)
 
 
-# Test databse REMOVE LATER
+# retrieve test database REMOVE LATER
 @app.route("/testDatabase", methods=["POST"])
 def test_database():
     email = request.json["email"]
@@ -47,7 +48,7 @@ def test_database():
         "companyID": user.companyID,
     }) 
 
-
+# company account databse REMOVE LATER
 class CompanyAccount(db.Model):
     __tablename__ = "companyaccount"
     companyId = db.Column(db.String(256), primary_key=True, unique=True)
@@ -58,7 +59,7 @@ class CompanyAccount(db.Model):
     createdDatetime = db.Column(db.String(256))
     updatedDatetime = db.Column(db.String(256))
 
-# retrieve company account
+# retrieve company account REMOVE LATER
 @app.route("/companyaccount", methods=["POST"])
 def retrieve_companyaccount():
     companyId = request.json["companyId"]
