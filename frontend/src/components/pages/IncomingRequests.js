@@ -58,6 +58,7 @@ const IncomingRequests = () => {
 
   const handleApproveSelected = () => {
     // Add your accept logic here
+    console.log(selectedIds);
   };
 
   const handleRejectSelected = () => {
@@ -158,7 +159,7 @@ const IncomingRequests = () => {
         <div className="flex space-x-3 py-3">
           <button
             onClick={() => handleApproveSelected()}
-            className="p-1 hover:bg-green-100"
+            className="p-1 hover:bg-green-100 border"
             title="AcceptSelected"
           >
             <div className="flex items-center space-x-2">
@@ -168,7 +169,7 @@ const IncomingRequests = () => {
           </button>
           <button
             onClick={() => handleRejectSelected()}
-            className="p-1 hover:bg-red-100"
+            className="p-1 hover:bg-red-100 border"
             title="RejectSelected"
           >
             <div className="flex items-center space-x-2">
