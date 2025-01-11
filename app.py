@@ -49,17 +49,6 @@ class User(db.Model):
     email = db.Column(db.String(255), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
 
-# retrieve test database REMOVE LATER
-@app.route("/testDatabase", methods=["POST"])
-def test_database():
-    email = request.json["email"]
-    user = User.query.filter_by(email=email).first()
-
-    return jsonify({
-        "email": user.email,
-        "companyID": user.companyID,
-    }) 
-
 # company account database
 class CompanyAccount(db.Model):
     __tablename__ = "companyaccount"
@@ -70,6 +59,31 @@ class CompanyAccount(db.Model):
     cashBalance = db.Column(db.String(256))
     createdDatetime = db.Column(db.String(256))
     updatedDatetime = db.Column(db.String(256))
+
+# outstanding request databse
+class OutstandingRequest(db.Model):
+    __tablename__ = "outstandingrequest"
+    id = db.Column(db.String(256), primary_key=True, unique=True)
+    companyId = db.Column(db.String(256), unique=True)
+    requestorCompanyId = db.Column(db.String(256), unique=True)
+    carbonUnitPrice = db.Column(db.String(256))
+    carbonQuantity = db.Column(db.String(256))
+    requestReason = db.Column(db.String(256))
+    requestStatus = db.Column(db.String(256))
+    requestType = db.Column(db.String(256))
+    createdDatetime = db.Column(db.String(256))
+    updatedDatetime = db.Column(db.String(256))
+
+# retrieve test database REMOVE LATER
+@app.route("/testDatabase", methods=["POST"])
+def test_database():
+    email = request.json["email"]
+    user = User.query.filter_by(email=email).first()
+
+    return jsonify({
+        "email": user.email,
+        "companyID": user.companyID,
+    })
 
 # retrieve company account
 @app.route("/companyaccount", methods=["POST"])
@@ -86,20 +100,6 @@ def retrieve_companyaccount():
         "createdDatetime": companyaccount.createdDatetime,
         "updatedDatetime": companyaccount.updatedDatetime
     }) 
-
-# outstanding request databse
-class OutstandingRequest(db.Model):
-    __tablename__ = "outstandingrequest"
-    id = db.Column(db.String(256), primary_key=True, unique=True)
-    companyId = db.Column(db.String(256), unique=True)
-    requestorCompanyId = db.Column(db.String(256), unique=True)
-    carbonUnitPrice = db.Column(db.String(256))
-    carbonQuantity = db.Column(db.String(256))
-    requestReason = db.Column(db.String(256))
-    requestStatus = db.Column(db.String(256))
-    requestType = db.Column(db.String(256))
-    createdDatetime = db.Column(db.String(256))
-    updatedDatetime = db.Column(db.String(256))
 
 # retrieve outstanding request
 @app.route("/outstandingrequest", methods=["POST"])
