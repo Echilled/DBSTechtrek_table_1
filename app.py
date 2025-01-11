@@ -20,19 +20,42 @@ jwt = JWTManager(app)
 with app.app_context():
     db.create_all()
 
+
+# JWT version
 @app.route("/@me")
 def get_current_user():
-    user_id = session.get("user_id")
 
+    user_id = get_jwt_identity()
+    
+    
     if not user_id:
         return jsonify({"error": "Unauthorized"}), 401
-    
+
+
     user = User.query.filter_by(id=user_id).first()
+    
     return jsonify({
         "name": user.name,
         "id": user.id,
         "email": user.email
     }) 
+
+# Server-side version
+# @app.route("/@me")
+# def get_current_user():
+
+    
+#     user_id = session.get("user_id")
+
+#     if not user_id:
+#         return jsonify({"error": "Unauthorized"}), 401
+    
+#     user = User.query.filter_by(id=user_id).first()
+#     return jsonify({
+#         "name": user.name,
+#         "id": user.id,
+#         "email": user.email
+#     }) 
 
 @app.route("/register", methods=["POST"])
 def register_user():
@@ -67,9 +90,12 @@ def login_user():
     if user is None:
         return jsonify({"error": "Unauthorized"}), 401
 
-    if not bcrypt.check_password_hash(user.password, password):
-        return jsonify({"error": "Unauthorized"}), 401
-    
+    if user and bcrypt.check_password_hash(user.password, password):
+        access_token = create_access_token(identity=user.id)
+        return jsonify({'message': 'Login Success', 'access_token': access_token})
+    else:
+        return jsonify({'message': 'Login Failed'}), 401
+        
     session["user_id"] = user.id
 
     # auto return a cookie too
