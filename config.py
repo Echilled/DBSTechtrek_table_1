@@ -6,6 +6,10 @@ load_dotenv()
 
 class ApplicationConfig:
     SECRET_KEY = os.environ["SECRET_KEY"]
+    PASS_WORD = os.environ["PASSWORD"]
+    HOST = os.environ["HOST"]
+    DB_NAME = os.environ["DB_NAME"]
+    
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ECHO = True
