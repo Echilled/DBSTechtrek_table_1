@@ -129,6 +129,7 @@ def trades():
         OutstandingRequest.id,
         OutstandingRequest.carbonUnitPrice,
         OutstandingRequest.carbonQuantity,
+        OutstandingRequest.requestType,
         OutstandingRequest.createdDatetime,
         OutstandingRequest.updatedDatetime,
         CompanyAccount.companyName
@@ -141,6 +142,7 @@ def trades():
             "companyName": result.companyName,
             "carbonUnitPrice": result.carbonUnitPrice,
             "carbonQuantity": result.carbonQuantity,
+            "requestType": result.requestType,
             "createdDatetime": result.createdDatetime,
             "updatedDatetime": result.updatedDatetime
         }
