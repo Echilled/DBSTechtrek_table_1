@@ -4,9 +4,9 @@ from flask_bcrypt import Bcrypt
 from flask_cors import CORS, cross_origin
 from flask_session import Session
 from config import ApplicationConfig
-# from models import db, User
 from uuid import uuid4
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, get_jwt
+import jwt
 import mysql.connector
 import os
 from dotenv import load_dotenv
@@ -18,38 +18,31 @@ app.config.from_object(ApplicationConfig)
 
 bcrypt = Bcrypt(app)
 CORS(app, supports_credentials=True)
-server_session = Session(app) #only if the server-sided session is enabled
 # db.init_app(app)
+# server_session = Session(app) # only if the server-sided session is enabled
 
-
-SECRET_KEY = os.environ["SECRET_KEY"]
-USER_NAME = os.environ["USER_NAME"]
-PASS_WORD = os.environ["PASS_WORD"]
-HOST= os.environ["HOST"]
-DB_NAME = os.environ["DB_NAME"]
-JWT_SECRET_KEY = os.environ["JWT_SECRET"]
+app.config['JWT_TOKEN_LOCATION'] = ['headers']
 
 jwt = JWTManager(app)
 
 db = SQLAlchemy(app)
-app.config['JWT_TOKEN_LOCATION'] = ['headers']
 
 
 with app.app_context():
     db.create_all()
 
-# ---------------------------- Models (to be transfered to another file later) -------------------------------
+# ---------------------------- Models (to be transfered to another file later for security reasons) -------------------------------
 def get_uuid():
     return uuid4().hex
 
-# test databse REMOVE LATER
+# test databse
 class User(db.Model):
     __tablename__ = "users"
     companyID = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(255), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
 
-# company account databse REMOVE LATER
+# company account databse 
 class CompanyAccount(db.Model):
     __tablename__ = "companyaccount"
     companyId = db.Column(db.String(256), primary_key=True, unique=True)
@@ -59,6 +52,8 @@ class CompanyAccount(db.Model):
     cashBalance = db.Column(db.String(256))
     createdDatetime = db.Column(db.String(256))
     updatedDatetime = db.Column(db.String(256))
+
+# ---------------------------------------------------------------------------------------------------------
 
 # retrieve test database REMOVE LATER
 @app.route("/testDatabase", methods=["POST"])
@@ -70,6 +65,7 @@ def test_database():
         "email": user.email,
         "companyID": user.companyID,
     }) 
+
 
 
 # retrieve company account REMOVE LATER
@@ -102,6 +98,7 @@ class OutstandingRequest(db.Model):
     createdDatetime = db.Column(db.String(256))
     updatedDatetime = db.Column(db.String(256))
 
+
 # retrieve outstanding request REMOVE LATER
 @app.route("/outstandingrequest", methods=["POST"])
 def outstandingrequest():
@@ -122,38 +119,30 @@ def outstandingrequest():
     }) 
 
 # JWT version
-@app.route("/@me", methods=["POST"])
-@jwt_required() 
+@app.route("/@me", methods=["GET"])
+@jwt_required()
 def get_current_user():
-
-    user_id = get_jwt_identity()
     
-    if not user_id:
-        return jsonify({"error": "Unauthorized"}), 401
-
-
-    user = User.query.filter_by(id=user_id).first()
+    user_id = get_jwt_identity()
+    user = User.query.filter_by(compandyID=user_id).first()
     
     return jsonify({
-        "name": user.name,
-        "id": user.id,
+        "id": user.compandyID,
         "email": user.email
     }) 
 
-# Server-side version
-# @app.route("/@me")
-# def get_current_user():
-
+# # Server-side version
+# @app.route("/@me_server_side")
+# def get_current_user_server_side():
     
-#     user_id = session.get("user_id")
+#     companyID = session.get("company_id")
 
-#     if not user_id:
+#     if not companyID:
 #         return jsonify({"error": "Unauthorized"}), 401
     
-#     user = User.query.filter_by(id=user_id).first()
+#     user = User.query.filter_by(companyID=companyID).first()
 #     return jsonify({
-#         "name": user.name,
-#         "id": user.id,
+#         "id": user.companyID,
 #         "email": user.email
 #     }) 
 
@@ -167,14 +156,14 @@ def register_user():
 
     if user_exists:
         return jsonify({"error": "User already exists"}), 409
-    
+
+
     hashed_password = str(bcrypt.generate_password_hash(password).decode('utf-8'))
 
     new_user = User(companyID = companyID, email=email, password=hashed_password)
     db.session.add(new_user)
     db.session.commit()
     
-
     return jsonify({
         "email": new_user.email,
     })
@@ -189,17 +178,14 @@ def login_user():
     if user is None:
         return jsonify({"error": "Unauthorized"}), 401
 
+    
+
     if user and bcrypt.check_password_hash(user.password, password):
         access_token = create_access_token(identity=user.companyID)
         return jsonify({'message': 'Login Success', 'access_token': access_token})
     else:
         return jsonify({'message': 'Login Failed'}), 401
 
-    # auto return a cookie too
-    return jsonify({
-        "id": user.id,
-        "email": user.email
-    })
 
 @app.route("/logout", methods=["POST"])
 def logout_user():
