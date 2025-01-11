@@ -42,14 +42,14 @@ with app.app_context():
 def get_uuid():
     return uuid4().hex
 
-# test databse REMOVE LATER
+# test database model
 class User(db.Model):
     __tablename__ = "users"
     companyID = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(255), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
 
-# company account database
+# company account model
 class CompanyAccount(db.Model):
     __tablename__ = "companyaccount"
     companyId = db.Column(db.String(256), primary_key=True, unique=True)
@@ -60,7 +60,7 @@ class CompanyAccount(db.Model):
     createdDatetime = db.Column(db.String(256))
     updatedDatetime = db.Column(db.String(256))
 
-# outstanding request databse
+# outstanding request model
 class OutstandingRequest(db.Model):
     __tablename__ = "outstandingrequest"
     id = db.Column(db.String(256), primary_key=True, unique=True)
@@ -74,7 +74,7 @@ class OutstandingRequest(db.Model):
     createdDatetime = db.Column(db.String(256))
     updatedDatetime = db.Column(db.String(256))
 
-# retrieve test database REMOVE LATER
+# test database connection
 @app.route("/testDatabase", methods=["POST"])
 def test_database():
     email = request.json["email"]
