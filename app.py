@@ -4,6 +4,7 @@ from flask_cors import CORS, cross_origin
 from flask_session import Session
 from config import ApplicationConfig
 from models import db, User
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, get_jwt
 
 app = Flask(__name__)
 app.config.from_object(ApplicationConfig)
@@ -12,6 +13,8 @@ bcrypt = Bcrypt(app)
 CORS(app, supports_credentials=True)
 server_session = Session(app) #only if the server-sided session is enabled
 db.init_app(app)
+
+jwt = JWTManager(app)
 
 
 with app.app_context():

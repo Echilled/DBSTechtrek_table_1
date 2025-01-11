@@ -5,3 +5,5 @@ python-dotenv
 flask-session
 redis
 flask-cors
+flask-bcrypt 
+Flask-JWT-Extended
