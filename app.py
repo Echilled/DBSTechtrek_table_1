@@ -10,6 +10,7 @@ import jwt
 import mysql.connector
 import os
 from dotenv import load_dotenv
+import asyncio
 
 load_dotenv()
 
@@ -42,18 +43,16 @@ class User(db.Model):
     email = db.Column(db.String(255), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
 
-# ---------------------------------------------------------------------------------------------------------
 
-# retrieve test database REMOVE LATER
-@app.route("/testDatabase", methods=["POST"])
-def test_database():
-    email = request.json["email"]
-    user = User.query.filter_by(email=email).first()
+class RequestReceived(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    updated_datetime = db.Column(db.DateTime, nullable=False)
+    alerttext = db.Column(db.String(255), nullable=True)
+    alertstatus = db.Column(db.String(50), nullable=True)
+    alertviewdate = db.Column(db.DateTime, nullable=True)
+    createddatetime = db.Column(db.DateTime, nullable=True)
+    alertdatetime = db.Column(db.DateTime, nullable=True)
 
-    return jsonify({
-        "email": user.email,
-        "companyID": user.companyID,
-    }) 
 
 # company account database
 class CompanyAccount(db.Model):
@@ -79,6 +78,21 @@ class OutstandingRequest(db.Model):
     requestType = db.Column(db.String(256))
     createdDatetime = db.Column(db.String(256))
     updatedDatetime = db.Column(db.String(256))
+    
+# ---------------------------------------------------------------------------------------------------------
+
+# retrieve test database REMOVE LATER
+@app.route("/testDatabase", methods=["POST"])
+def test_database():
+    email = request.json["email"]
+    user = User.query.filter_by(email=email).first()
+
+    return jsonify({
+        "email": user.email,
+        "companyID": user.companyID,
+    }) 
+
+
 
 
 
@@ -309,6 +323,12 @@ def create_request():
 
 
         return jsonify({"message": "Request created successfully"}), 201
+
+@app.route("/createAlert", methods=["PUT"])
+def createAlert():
+    requestID = request.json["requestID"]
+
+
 
 @app.route("/approve/<request_id>", methods=["PUT"])
 def approveRequest(request_id):
