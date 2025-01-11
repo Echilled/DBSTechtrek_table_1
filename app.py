@@ -30,13 +30,13 @@ def get_uuid():
 
 class User(db.Model):
     __tablename__ = "users"
-    email = db.Column(db.String(345), unique=True)
-    companyid = db.Column(db.Strng(300), unique=True)
+    email = db.Column(db.String(345), primary_key=True, unique=True)
+    companyid = db.Column(db.String(300), unique=True)
     password = db.Column(db.Text, nullable=False)
 
 
 # Test databse REMOVE LATER
-@app.route("/testDatabase")
+@app.route("/testDatabase", methods=["POST"])
 def test_database():
     email = request.json["email"]
     user_exists = User.query.filter_by(email=email).first() is not None
