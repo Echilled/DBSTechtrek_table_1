@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import BalanceOverview from "./BalanceOverview";
 import OutstandingRequests from "./OutstandingRequests";
 
@@ -9,65 +8,77 @@ const LandingPage = () => {
   const [companyName, setCompanyName] = useState("");
 
   useEffect(() => {
-    // Fetch balances
-    axios
-      .get("/api/balances")
-      .then((response) => {
-        setBalances(response.data);
-      })
-      .catch((error) => console.error("Error fetching balances:", error));
+    // Use fake data instead of API calls for testing purposes
 
-    // Fetch outstanding requests
-    axios
-      .get("/api/requests")
-      .then((response) => {
-        setRequests(response.data);
-      })
-      .catch((error) => console.error("Error fetching requests:", error));
+    // Fake balance data
+    setBalances({
+      carbonBalance: 1000, // Example carbon balance
+      cashBalance: 5000,   // Example cash balance
+    });
 
-    // Fetch company name
-    axios
-      .get("/api/companyName")
-      .then((response) => {
-        setCompanyName(response.data.companyName);
-      })
-      .catch((error) => console.error("Error fetching company name:", error));
+    // Fake company name
+    setCompanyName("Example Company");
+
+    // Fake requests data
+    setRequests([
+      {
+        id: 1,
+        requestDate: "2024-01-10",
+        companyName: "TechTrek 2025 Pte Ltd",
+        carbonUnitPrice: 20,
+        carbonQuantity: 200,
+        requestReason: "Sustainability initiative",
+        requestType: "Buy",
+      },
+      {
+        id: 2,
+        requestDate: "2024-01-05",
+        companyName: "Senger LLC",
+        carbonUnitPrice: 18,
+        carbonQuantity: 150,
+        requestReason: "Compliance with regulations",
+        requestType: "Sell",
+      },
+      {
+        id: 3,
+        requestDate: "2024-01-08",
+        companyName: "Mills Inc",
+        carbonUnitPrice: 22,
+        carbonQuantity: 300,
+        requestReason: "Corporate social responsibility",
+        requestType: "Buy",
+      },
+    ]);
   }, []);
 
-  // Add a new request
+  // Add a new request (for testing, we add fake data)
   const handleAddRequest = (newRequest) => {
-    axios
-      .post("/api/requests", newRequest)
-      .then((response) => {
-        setRequests((prevRequests) => [...prevRequests, response.data]);
-      })
-      .catch((error) => console.error("Error adding request:", error));
+    const fakeNewRequest = {
+      id: Date.now(), // Generate a unique ID based on timestamp
+      requestDate: "2025-01-12",
+      companyName: "Gutmann - Langosh",
+      carbonUnitPrice: 25,
+      carbonQuantity: 500,
+      requestReason: "New sustainability project",
+      requestType: "Buy",
+    };
+    setRequests((prevRequests) => [...prevRequests, fakeNewRequest]);
   };
 
-  // Delete a request
+  // Delete a request (for testing, remove by id)
   const handleDeleteRequest = (requestId) => {
-    axios
-      .delete(`/api/requests/${requestId}`)
-      .then(() => {
-        setRequests((prevRequests) =>
-          prevRequests.filter((request) => request.id !== requestId)
-        );
-      })
-      .catch((error) => console.error("Error deleting request:", error));
+    setRequests((prevRequests) =>
+      prevRequests.filter((request) => request.id !== requestId)
+    );
   };
 
-  // Edit a request
+  // Edit a request (for testing, we'll modify one request)
   const handleEditRequest = (requestId, updatedRequest) => {
-    axios
-      .put(`/api/requests/${requestId}`, updatedRequest)
-      .then((response) => {
-        setRequests((prevRequests) =>
-          prevRequests.map((request) =>
-            request.id === requestId ? response.data : request
-          )
-        );
-      })
-      .catch((error) => console.error("Error editing request:", error));
+    setRequests((prevRequests) =>
+      prevRequests.map((request) =>
+        request.id === requestId ? { ...request, ...updatedRequest } : request
+      )
+    );
   };
 
   return (
