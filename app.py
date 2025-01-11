@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify, session
+from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS, cross_origin
 from flask_session import Session
@@ -12,13 +13,24 @@ app.config.from_object(ApplicationConfig)
 bcrypt = Bcrypt(app)
 CORS(app, supports_credentials=True)
 server_session = Session(app) #only if the server-sided session is enabled
-db.init_app(app)
+# db.init_app(app)
 
 jwt = JWTManager(app)
+
+db = SQLAlchemy(app)
 
 
 with app.app_context():
     db.create_all()
+
+
+# Test databse REMOVE LATER
+@app.route("/testDatabase")
+    email = request.json["email"]
+    user_exists = User.query.filter_by(email=email).first() is not None
+
+    return user_exists
+
 
 
 # JWT version
@@ -95,7 +107,7 @@ def login_user():
         return jsonify({'message': 'Login Success', 'access_token': access_token})
     else:
         return jsonify({'message': 'Login Failed'}), 401
-        
+
     session["user_id"] = user.id
 
     # auto return a cookie too
