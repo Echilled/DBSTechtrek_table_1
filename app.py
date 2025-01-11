@@ -42,22 +42,15 @@ with app.app_context():
 def get_uuid():
     return uuid4().hex
 
+# test databse REMOVE LATER
 class User(db.Model):
     __tablename__ = "users"
     companyID = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(255), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
 
-# Database connection
-def get_db_connection():
-    return mysql.connector.connect(
-        host=app.config['HOST'],
-        user=app.config['USER_NAME'],
-        password=app.config['PASS_WORD'],
-        database=app.config['DB_NAME']
-    )
 
-# Test databse REMOVE LATER
+# retrieve test database REMOVE LATER
 @app.route("/testDatabase", methods=["POST"])
 def test_database():
     email = request.json["email"]
@@ -68,7 +61,65 @@ def test_database():
         "companyID": user.companyID,
     }) 
 
+# company account databse REMOVE LATER
+class CompanyAccount(db.Model):
+    __tablename__ = "companyaccount"
+    companyId = db.Column(db.String(256), primary_key=True, unique=True)
+    companyName = db.Column(db.String(256), unique=True)
+    activeAccount = db.Column(db.String(256))
+    carbonBalance = db.Column(db.String(256))
+    cashBalance = db.Column(db.String(256))
+    createdDatetime = db.Column(db.String(256))
+    updatedDatetime = db.Column(db.String(256))
 
+# retrieve company account REMOVE LATER
+@app.route("/companyaccount", methods=["POST"])
+def retrieve_companyaccount():
+    companyId = request.json["companyId"]
+    companyaccount = CompanyAccount.query.filter_by(companyId=companyId).first()
+
+    return jsonify({
+        "companyId": companyaccount.companyId,
+        "companyName": companyaccount.companyName,
+        "activeAccount": companyaccount.activeAccount,
+        "carbonBalance": companyaccount.carbonBalance,
+        "cashBalance": companyaccount.cashBalance,
+        "createdDatetime": companyaccount.createdDatetime,
+        "updatedDatetime": companyaccount.updatedDatetime
+    }) 
+
+# outstanding request databse REMOVE LATER
+class OutstandingRequest(db.Model):
+    __tablename__ = "outstandingrequest"
+    id = db.Column(db.String(256), primary_key=True, unique=True)
+    companyId = db.Column(db.String(256), unique=True)
+    requestorCompanyId = db.Column(db.String(256), unique=True)
+    carbonUnitPrice = db.Column(db.String(256))
+    carbonQuantity = db.Column(db.String(256))
+    requestReason = db.Column(db.String(256))
+    requestStatus = db.Column(db.String(256))
+    requestType = db.Column(db.String(256))
+    createdDatetime = db.Column(db.String(256))
+    updatedDatetime = db.Column(db.String(256))
+
+# retrieve outstanding request REMOVE LATER
+@app.route("/outstandingrequest", methods=["POST"])
+def outstandingrequest():
+    id = request.json["id"]
+    outstandingrequest = OutstandingRequest.query.filter_by(id=id).first()
+
+    return jsonify({
+        "id": outstandingrequest.id,
+        "companyId": outstandingrequest.companyId,
+        "requestorCompanyId": outstandingrequest.requestorCompanyId,
+        "carbonUnitPrice": outstandingrequest.carbonUnitPrice,
+        "carbonQuantity": outstandingrequest.carbonQuantity,
+        "requestReason": outstandingrequest.requestReason,
+        "requestStatus": outstandingrequest.requestStatus,
+        "requestType": outstandingrequest.requestType,
+        "createdDatetime": outstandingrequest.createdDatetime,
+        "updatedDatetime": outstandingrequest.updatedDatetime
+    }) 
 
 # JWT version
 @app.route("/@me")
@@ -150,9 +201,8 @@ def login_user():
     if user is None:
         return jsonify({"error": "Unauthorized"}), 401
 
-
-    if user and str(bcrypt.generate_password_hash(password).decode('utf-8'))==user.password:
-        access_token = create_access_token(identity=user.id)
+    if user and bcrypt.check_password_hash(user.password, password):
+        access_token = create_access_token(identity=user.companyID)
         return jsonify({'message': 'Login Success', 'access_token': access_token})
     else:
         return jsonify({'message': 'Login Failed'}), 401
