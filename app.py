@@ -124,6 +124,36 @@ def outstandingrequest():
         "updatedDatetime": outstandingrequest.updatedDatetime
     }) 
 
+# retrieve all trades
+@app.route("/trades", methods=["GET"])
+def trades():
+    
+    # Perform join query
+    results = db.session.query(
+        OutstandingRequest.id,
+        OutstandingRequest.carbonUnitPrice,
+        OutstandingRequest.carbonQuantity,
+        OutstandingRequest.createdDatetime,
+        OutstandingRequest.updatedDatetime,
+        CompanyAccount.companyName
+    ).join(CompanyAccount, OutstandingRequest.companyId == CompanyAccount.companyId).all()
+
+    # Process results
+    data = [
+        {
+            "id": result.id,
+            "carbonUnitPrice": result.carbonUnitPrice,
+            "companyName": result.companyName,
+            "carbonQuantity": result.carbonQuantity,
+            "createdDatetime": result.createdDatetime,
+            "updatedDatetime": result.updatedDatetime
+        }
+        for result in results
+    ]
+    
+    # Return the joined data
+    return jsonify(data), 200
+
 # JWT version
 @app.route("/@me", methods=["POST"])
 #def get_current_user(current_user):
