@@ -12,6 +12,7 @@ import {
   LinkText,
 } from "../layout/text-variations";
 import ErrorIcon from "@mui/icons-material/Error";
+import axios from "axios";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -21,52 +22,86 @@ const Login = () => {
     return localStorage.getItem("username");
   };
 
+  const apigatewayURL = "http://localhost:5000"
+
+  const createAPIInstance = () => {
+    // const URL = `${API_URL}:${port}/`; // Assuming your APIs are on localhost
+    // http://localhost:8081 for catalogue service
+  
+    const instance = axios.create();
+    instance.interceptors.request.use(
+      (config) => {
+        const token = localStorage.getItem("token");
+        if (token) {
+          //   config.headers["Authorization"] = 'Bearer ' + token;  // for Spring Boot back-end
+          config.headers["x-access-token"] = token; // for Node.js Express back-end
+        }
+        return config;
+      },
+      (error) => {
+        return Promise.reject(error);
+      }
+    );
+  
+    instance.interceptors.response.use(
+      (res) => {
+        return res;
+      },
+      
+    );
+    return instance;
+  };
+
+  const instance = createAPIInstance();
+
   /* API post: login */
-  // const login = (email, password) => {
-  //   return instance
-  //     .post(
-  //       apigatewayURL + "/auth/login",
-  //       {
-  //         email,
-  //         password,
-  //       },
-  //       {
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //         },
-  //       }
-  //     )
-  //     .then((response) => {
-  //       if (response.data.accessToken) {
-  //         TokenService.setUser(response.data);
-  //       } else {
-  //         response.data.errors = ["Error logging in. Please try again"];
-  //         throw response;
-  //       }
-  //     })
-  //     .catch((error) => {
-  //       // Try block errors. ie. did not receive access token.
-  //       if (error.data) {
-  //         throw error.data.errors;
-  //       }
+  const login = (email, password) => {
+    return instance
+      .post(
+        apigatewayURL + "/login",
+        {
+          email,
+          password,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      )
+      .then((response) => {
+        if (response.data.accessToken) {
+          console.log(response.data.accessToken, "TEST", JSON.stringify(response.data.accessToken));
+          localStorage.setItem("token", response.data.accessToken);
+          localStorage.setItem("username", response.data.username);
+        } else {
+          response.data.errors = ["Error logging in. Please try again"];
+          throw response;
+        }
+      })
+      .catch((error) => {
+        // Try block errors. ie. did not receive access token.
+        if (error.data) {
+          throw error.data.errors;
+        }
   
-  //       // Validation Server response
-  //       if (error.response) {
-  //         console.log(error);
-  //         throw error.response.data.errors;
-  //       }
+        // Validation Server response
+        if (error.response) {
+          console.log(error);
+          throw error.response.data.errors;
+        }
   
-  //       // Backend is down or any other error
-  //       throw ["Unable to connect to server"];
-  //     });
-  // };
+        // Backend is down or any other error
+        throw ["Unable to connect to server"];
+      });
+  };
 
   /* send user to landing page upon successful login */
-  // useEffect(() => {
-  //   if (getCurrentUser() !== null) {
-  //     navigate(-1);
-  //   }
-  // }, []);
+  useEffect(() => {
+    if (getCurrentUser() !== null) {
+      navigate("/");
+    }
+  }, []);
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -95,13 +130,13 @@ const Login = () => {
         message: ["Fill up all the fields"],
       });
     } else {
-      // login(username, password)
-      //   .then(() => {
-      //     navigate("/");
-      //   })
-      //   .catch((error) => {
-      //     setFormValidation({ isInvalid: true, message: error });
-      //   });
+      login(username, password)
+        .then(() => {
+          navigate("/");
+        })
+        .catch((error) => {
+          setFormValidation({ isInvalid: true, message: error });
+        });
     }
   };
 
@@ -145,9 +180,9 @@ const Login = () => {
           onChange={handleSwitchChange}
         />
       </InnerContainer>
-      {/* <LinkText fontSize="12px" onClick={() => navigate("/forgotPassword")}>
+      <LinkText fontSize="12px" onClick={() => navigate("/forgotPassword")}>
         Forgot password?
-      </LinkText> */}
+      </LinkText>
       <InnerContainer>
         <ButtonBuilder
           fontSize={15}
@@ -161,7 +196,7 @@ const Login = () => {
           bold={true}
           onClick={handleLogin}
         />
-        {/* <TextBetweenLine>or continue with</TextBetweenLine>
+        <TextBetweenLine>or continue with</TextBetweenLine>
         <ButtonBuilder
           fontSize={15}
           width={"100%"}
@@ -172,14 +207,14 @@ const Login = () => {
           labelColor="black"
           radius={16}
           bold={true}
-          icon={<FcGoogle />}
-          onClick={handleGoogleLogin}
-        /> */}
+          // icon={<FcGoogle />}
+          // onClick={handleGoogleLogin}
+        />
       </InnerContainer>
-      {/* <div>
+      <div>
         <Text>Don&apos;t have a profile? </Text>
         <LinkText onClick={() => navigate("/signup")}>Sign Up</LinkText>
-      </div> */}
+      </div>
     </OuterContainer>
   )
 }
