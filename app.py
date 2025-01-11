@@ -75,7 +75,38 @@ def retrieve_companyaccount():
         "updatedDatetime": companyaccount.updatedDatetime
     }) 
 
+# outstanding request databse REMOVE LATER
+class OutstandingRequest(db.Model):
+    __tablename__ = "outstandingrequest"
+    id = db.Column(db.String(256), primary_key=True, unique=True)
+    companyId = db.Column(db.String(256), unique=True)
+    requestorCompanyId = db.Column(db.String(256), unique=True)
+    carbonUnitPrice = db.Column(db.String(256))
+    carbonQuantity = db.Column(db.String(256))
+    requestReason = db.Column(db.String(256))
+    requestStatus = db.Column(db.String(256))
+    requestType = db.Column(db.String(256))
+    createdDatetime = db.Column(db.String(256))
+    updatedDatetime = db.Column(db.String(256))
 
+# retrieve outstanding request REMOVE LATER
+@app.route("/outstandingrequest", methods=["POST"])
+def outstandingrequest():
+    id = request.json["id"]
+    outstandingrequest = OutstandingRequest.query.filter_by(id=id).first()
+
+    return jsonify({
+        "id": outstandingrequest.id,
+        "companyId": outstandingrequest.companyId,
+        "requestorCompanyId": outstandingrequest.requestorCompanyId,
+        "carbonUnitPrice": outstandingrequest.carbonUnitPrice,
+        "carbonQuantity": outstandingrequest.carbonQuantity,
+        "requestReason": outstandingrequest.requestReason,
+        "requestStatus": outstandingrequest.requestStatus,
+        "requestType": outstandingrequest.requestType,
+        "createdDatetime": outstandingrequest.createdDatetime,
+        "updatedDatetime": outstandingrequest.updatedDatetime
+    }) 
 
 # JWT version
 @app.route("/@me")
