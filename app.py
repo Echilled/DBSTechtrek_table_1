@@ -66,6 +66,31 @@ class CompanyAccount(db.Model):
     createdDatetime = db.Column(db.String(256))
     updatedDatetime = db.Column(db.String(256))
 
+# outstanding request model
+class OutstandingRequest(db.Model):
+    __tablename__ = "outstandingrequest"
+    id = db.Column(db.String(256), primary_key=True, unique=True)
+    companyId = db.Column(db.String(256), unique=True)
+    requestorCompanyId = db.Column(db.String(256), unique=True)
+    carbonUnitPrice = db.Column(db.String(256))
+    carbonQuantity = db.Column(db.String(256))
+    requestReason = db.Column(db.String(256))
+    requestStatus = db.Column(db.String(256))
+    requestType = db.Column(db.String(256))
+    createdDatetime = db.Column(db.String(256))
+    updatedDatetime = db.Column(db.String(256))
+
+# test database connection
+@app.route("/testDatabase", methods=["POST"])
+def test_database():
+    email = request.json["email"]
+    user = User.query.filter_by(email=email).first()
+
+    return jsonify({
+        "email": user.email,
+        "companyID": user.companyID,
+    })
+
 # retrieve company account
 @app.route("/companyaccount", methods=["POST"])
 def retrieve_companyaccount():
@@ -174,7 +199,7 @@ def companytraderequest():
     # handle cases where no result is found
     if result is None:
         return jsonify({"error": "No data found"}), 404
-    
+
     # return company trade request
     return jsonify({
         "id": result.id,
@@ -263,6 +288,115 @@ def login_user():
 def logout_user():
     # TODO: add logout
     return "200"
+
+@app.route("/create-request", methods=["POST"])
+def create_request():
+    data = request.json
+    try:
+        new_request = OutstandingRequest(
+            id=data["id"],
+            companyId=data["companyId"],
+            requestorCompanyId=data["requestorCompanyId"],
+            carbonUnitPrice=data["carbonUnitPrice"],
+            carbonQuantity=data["carbonQuantity"],
+            requestReason=data["requestReason"],
+            requestStatus="pending",
+            requestType=data["requestType"],
+            createdDatetime=data.get("createdDatetime"),
+            updatedDatetime=data.get("updatedDatetime")
+        )
+        db.session.add(new_request)
+        db.session.commit()
+        print("Request created successfully")
+        return jsonify({"message": "Request created successfully"}), 201
+    except Exception as e:
+        print(f"Error creating request: {e}")
+        db.session.rollback()
+        return jsonify({"error": "Failed to create request"}), 500
+    
+        # Update the requestReceived table
+        db.session.add(
+            RequestReceived(
+                id=new_request.id,
+                companyId=data["companyId"],
+                status="received",
+                createdDatetime=data.get("createdDatetime"),
+                updatedDatetime=data.get("updatedDatetime")
+            )
+        )
+        db.session.commit()
+
+
+
+
+        return jsonify({"message": "Request created successfully"}), 201
+
+@app.route("/approve/<request_id>", methods=["PUT"])
+def approveRequest(request_id):
+    data = request.json
+    outstanding_request = OutstandingRequest.query.filter_by(id=request_id).first()
+
+    if not outstanding_request:
+        return jsonify({"error": "Request not found"}), 404
+    
+    # check if the request if pending --> just for validation 
+
+    # Update the requestStatus to pending
+
+    # retrieve the company quantiy 
+
+    # if requester company quantity > company quantity 
+        # approve
+        # update DB for requester company and company carbon Balance, cash balance, 
+        # change the updated date type 
+    # else
+     # raise warning and leave status as pending
+
+
+
+
+# Edit an existing request
+@app.route("/edit-request/<request_id>", methods=["PUT"])
+def edit_request(request_id):
+    data = request.json
+    outstanding_request = OutstandingRequest.query.filter_by(id=request_id).first()
+
+    if not outstanding_request:
+        return jsonify({"error": "Request not found"}), 404
+
+    # Update fields
+    outstanding_request.carbonUnitPrice = data.get("carbonUnitPrice", outstanding_request.carbonUnitPrice)
+    outstanding_request.carbonQuantity = data.get("carbonQuantity", outstanding_request.carbonQuantity)
+    outstanding_request.requestReason = data.get("requestReason", outstanding_request.requestReason)
+    outstanding_request.requestType = data.get("requestType", outstanding_request.requestType)
+    outstanding_request.updatedDatetime = data.get("updatedDatetime")
+
+    db.session.commit()
+    return jsonify({"message": "Request updated successfully"}), 200
+
+@app.route("/delete-request/<request_id>", methods=["DELETE"])
+def delete_request(request_id):
+    try:
+        print("Request ID for deletion:", request_id)
+        
+        # Fetch the outstanding request by ID
+        outstanding_request = OutstandingRequest.query.filter_by(id=request_id).first()
+        
+        # If the request doesn't exist, return an error
+        if not outstanding_request:
+            return jsonify({"error": "Request not found"}), 404
+
+        # Delete the request
+        db.session.delete(outstanding_request)
+        db.session.commit()
+        return jsonify({"message": "Request deleted successfully"}), 200
+    
+    except Exception as e:
+        # Rollback the transaction in case of any errors
+        db.session.rollback()
+        print(f"An error occurred while deleting the request: {e}")
+        return jsonify({"error": "An error occurred while deleting the request"}), 500
+
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0')
