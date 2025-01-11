@@ -30,7 +30,7 @@ const LandingPage = () => {
       requestType: "Buy"
     }
   ]);
-  const [username, setUsername] = useState("JohnDoe123"); 
+  const [companyName, setCompanyName] = useState("Example Company");
 
   useEffect(() => {
     setBalances({ carbonBalance: 1000, cashBalance: 5000 });
@@ -60,22 +60,17 @@ const LandingPage = () => {
         requestType: "Buy"
       }
     ]);
-    setUsername("JohnDoe123"); 
+    setCompanyName("Example Company"); // Example: Fetch the company name dynamically here
   }, []);
 
-  // Container inline styles
-  const containerStyle = {
-    display: 'flex',
-    flexWrap: 'nowrap',
-    justifyContent: 'space-between',
-    padding: '20px',
-    gap: '20px'
-  };
-
   return (
-    <div style={containerStyle}>
-      <BalanceOverview balances={balances} username={username} />
-      <OutstandingRequests requests={requests} />
+    <div className="flex flex-col md:flex-row p-6 gap-6">
+      <div className="w-full md:w-1/4">
+        <BalanceOverview balances={balances} companyName={companyName} /> {/* Pass companyName instead of username */}
+      </div>
+      <div className="w-full md:w-3/4">
+        <OutstandingRequests requests={requests} />
+      </div>
     </div>
   );
 };
