@@ -19,6 +19,7 @@ server_session = Session(app) #only if the server-sided session is enabled
 jwt = JWTManager(app)
 
 db = SQLAlchemy(app)
+app.config['JWT_TOKEN_LOCATION'] = ['headers']
 
 
 with app.app_context():
@@ -31,7 +32,7 @@ def get_uuid():
 class User(db.Model):
     __tablename__ = "users"
     email = db.Column(db.String(345), primary_key=True, unique=True)
-    companyid = db.Column(db.String(300), unique=True)
+    companyID = db.Column(db.String(300), unique=True)
     password = db.Column(db.Text, nullable=False)
 
 
@@ -39,9 +40,12 @@ class User(db.Model):
 @app.route("/testDatabase", methods=["POST"])
 def test_database():
     email = request.json["email"]
-    user_exists = User.query.filter_by(email=email).first() is not None
+    user = User.query.filter_by(email=email).first()
 
-    return user_exists
+    return jsonify({
+        "email": user.email,
+        "companyID": user.companyID,
+    }) 
 
 
 

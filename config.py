@@ -10,6 +10,7 @@ class ApplicationConfig:
     PASS_WORD = os.environ["PASS_WORD"]
     HOST = os.environ["HOST"]
     DB_NAME = os.environ["DB_NAME"]
+    JWT_SECRET_KEY = os.environ["JWT_SECRET"]
     
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
