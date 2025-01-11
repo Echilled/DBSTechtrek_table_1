@@ -71,14 +71,14 @@ const Login = () => {
       )
       .then((response) => {
         console.log("Successfully logged in!")
-        if (response.data.accessToken) {
-          console.log(response.data.accessToken, "TEST", JSON.stringify(response.data.accessToken));
-          localStorage.setItem("token", response.data.accessToken);
-          localStorage.setItem("username", response.data.username);
-        } else {
-          response.data.errors = ["Error logging in. Please try again"];
-          throw response;
-        }
+        // if (response.data.accessToken) {
+        //   console.log(response.data.accessToken, "TEST", JSON.stringify(response.data.accessToken));
+        //   localStorage.setItem("token", response.data.accessToken);
+        //   localStorage.setItem("username", response.data.username);
+        // } else {
+        //   response.data.errors = ["Error logging in. Please try again"];
+        //   throw response;
+        // }
       })
       .catch((error) => {
         // Try block errors. ie. did not receive access token.
@@ -136,7 +136,7 @@ const Login = () => {
           navigate("/");
         })
         .catch((error) => {
-          setFormValidation({ isInvalid: true, message: error });
+          setFormValidation({ isInvalid: true, message: ["Invalid Login, please try again"] });
         });
     }
   };
