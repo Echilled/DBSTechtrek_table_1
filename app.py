@@ -80,16 +80,7 @@ class OutstandingRequest(db.Model):
     createdDatetime = db.Column(db.String(256))
     updatedDatetime = db.Column(db.String(256))
 
-# test database connection
-@app.route("/testDatabase", methods=["POST"])
-def test_database():
-    email = request.json["email"]
-    user = User.query.filter_by(email=email).first()
 
-    return jsonify({
-        "email": user.email,
-        "companyID": user.companyID,
-    })
 
 # retrieve company account
 @app.route("/companyaccount", methods=["POST"])
@@ -107,19 +98,7 @@ def retrieve_companyaccount():
         "updatedDatetime": companyaccount.updatedDatetime
     }) 
 
-# outstanding request databse
-class OutstandingRequest(db.Model):
-    __tablename__ = "outstandingrequest"
-    id = db.Column(db.String(256), primary_key=True, unique=True)
-    companyId = db.Column(db.String(256), unique=True)
-    requestorCompanyId = db.Column(db.String(256), unique=True)
-    carbonUnitPrice = db.Column(db.String(256))
-    carbonQuantity = db.Column(db.String(256))
-    requestReason = db.Column(db.String(256))
-    requestStatus = db.Column(db.String(256))
-    requestType = db.Column(db.String(256))
-    createdDatetime = db.Column(db.String(256))
-    updatedDatetime = db.Column(db.String(256))
+
 
 
 # retrieve outstanding request REMOVE LATER
@@ -338,19 +317,41 @@ def approveRequest(request_id):
 
     if not outstanding_request:
         return jsonify({"error": "Request not found"}), 404
-    
-    # check if the request if pending --> just for validation 
 
-    # Update the requestStatus to pending
+    if outstanding_request.requestStatus != "Pending":
+        return jsonify({"error": "Only pending requests can be approved"}), 400
 
-    # retrieve the company quantiy 
+    # Retrieve the company and requester accounts
+    company_account = CompanyAccount.query.filter_by(companyId=outstanding_request.companyId).first()
+    requester_account = CompanyAccount.query.filter_by(companyId=outstanding_request.requestorCompanyId).first()
 
-    # if requester company quantity > company quantity 
-        # approve
-        # update DB for requester company and company carbon Balance, cash balance, 
-        # change the updated date type 
-    # else
-     # raise warning and leave status as pending
+    if not company_account or not requester_account:
+        return jsonify({"error": "Company accounts not found"}), 404
+
+    # Check if the requester has enough balance
+    if requester_account.carbonBalance < outstanding_request.carbonQuantity:
+        return jsonify({"warning": "Requester does not have enough carbon balance"}), 400
+
+    # Approve the request and update balances
+    try:
+        company_account.carbonBalance -= outstanding_request.carbonQuantity
+        company_account.cashBalance += float(outstanding_request.carbonUnitPrice) * float(outstanding_request.carbonQuantity)
+
+        requester_account.carbonBalance += outstanding_request.carbonQuantity
+        requester_account.cashBalance -= float(outstanding_request.carbonUnitPrice) * float(outstanding_request.carbonQuantity)
+
+        # Update request status and timestamps
+        outstanding_request.requestStatus = "Approved"
+        outstanding_request.updatedDatetime = data.get("updatedDatetime")
+
+        db.session.commit()
+
+        return jsonify({"message": "Request approved successfully"}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error approving request: {e}")
+        return jsonify({"error": "Failed to approve request"}), 500
 
 
 
