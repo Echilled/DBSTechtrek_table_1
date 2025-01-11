@@ -11,6 +11,7 @@ import mysql.connector
 import os
 from dotenv import load_dotenv
 import asyncio
+from datetime import datetime, timedelta
 
 load_dotenv()
 
@@ -45,14 +46,15 @@ class User(db.Model):
 
 
 class RequestReceived(db.Model):
+    __tablename__ = "requestreceived"
     id = db.Column(db.Integer, primary_key=True)
-    updated_datetime = db.Column(db.DateTime, nullable=False)
-    alerttext = db.Column(db.String(255), nullable=True)
-    alertstatus = db.Column(db.String(50), nullable=True)
+    requestid = db.Column(db.Integer, nullable = False)
+    alertDateTime = db.Column(db.DateTime, nullable=False)
+    alertText = db.Column(db.String(255), nullable=True)
+    alertStatus = db.Column(db.String(50), nullable=True)
     alertviewdate = db.Column(db.DateTime, nullable=True)
-    createddatetime = db.Column(db.DateTime, nullable=True)
-    alertdatetime = db.Column(db.DateTime, nullable=True)
-
+    createdDatetime = db.Column(db.DateTime, nullable=True)
+    updatedDatetime = db.Column(db.DateTime, nullable=False)
 
 # company account database
 class CompanyAccount(db.Model):
@@ -78,7 +80,7 @@ class OutstandingRequest(db.Model):
     requestType = db.Column(db.String(256))
     createdDatetime = db.Column(db.String(256))
     updatedDatetime = db.Column(db.String(256))
-    
+
 # ---------------------------------------------------------------------------------------------------------
 
 # retrieve test database REMOVE LATER
@@ -324,10 +326,36 @@ def create_request():
 
         return jsonify({"message": "Request created successfully"}), 201
 
-@app.route("/createAlert", methods=["PUT"])
+@app.route("/createAlert", methods=["GET"])
 def createAlert():
-    requestID = request.json["requestID"]
+    # requestID = request.json["requestID"]
+    seven_days_ago = datetime.now() - timedelta(days=7)
+    records = OutstandingRequest.query.filter(OutstandingRequest.updatedDatetime < seven_days_ago).all()
 
+    for record in records:
+        if record.requestStatus.upper() == "PENDING":
+            try:
+                new_record = RequestReceived(
+                    requestid=record.id,
+                    alertDateTime=datetime.now(),
+                    alertText="Overdue",
+                    alertStatus="Scheduled",
+                    alertviewdate=None,
+                    createdDatetime=datetime.now(),
+                    updatedDatetime=datetime.now(),
+                )
+                db_session.add(new_record)
+                db_session.commit()
+                print("Record successfully added.")
+                return new_record
+            except SQLAlchemyError as e:
+                db_session.rollback()
+                print(f"Failed to add record: {e}")
+                return None
+
+    return {
+        "status":"success"
+    }
 
 
 @app.route("/approve/<request_id>", methods=["PUT"])
