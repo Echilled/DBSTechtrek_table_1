@@ -1,6 +1,6 @@
 import { LogOut } from "lucide-react";
 
-const Layout = () => {
+const Layout = ({ children }) => {
   const handleLogout = () => {
     // Add your logout logic here
     console.log("Logging out...");
