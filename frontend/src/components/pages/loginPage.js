@@ -70,6 +70,7 @@ const Login = () => {
         }
       )
       .then((response) => {
+        console.log("Successfully logged in!")
         if (response.data.accessToken) {
           console.log(response.data.accessToken, "TEST", JSON.stringify(response.data.accessToken));
           localStorage.setItem("token", response.data.accessToken);
