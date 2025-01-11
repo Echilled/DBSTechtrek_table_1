@@ -51,17 +51,6 @@ class User(db.Model):
     email = db.Column(db.String(255), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
 
-# company account databse REMOVE LATER
-class CompanyAccount(db.Model):
-    __tablename__ = "companyaccount"
-    companyId = db.Column(db.String(256), primary_key=True, unique=True)
-    companyName = db.Column(db.String(256), unique=True)
-    activeAccount = db.Column(db.String(256))
-    carbonBalance = db.Column(db.String(256))
-    cashBalance = db.Column(db.String(256))
-    createdDatetime = db.Column(db.String(256))
-    updatedDatetime = db.Column(db.String(256))
-
 # retrieve test database REMOVE LATER
 @app.route("/testDatabase", methods=["POST"])
 def test_database():
@@ -73,8 +62,18 @@ def test_database():
         "companyID": user.companyID,
     }) 
 
+# company account database
+class CompanyAccount(db.Model):
+    __tablename__ = "companyaccount"
+    companyId = db.Column(db.String(256), primary_key=True, unique=True)
+    companyName = db.Column(db.String(256), unique=True)
+    activeAccount = db.Column(db.String(256))
+    carbonBalance = db.Column(db.String(256))
+    cashBalance = db.Column(db.String(256))
+    createdDatetime = db.Column(db.String(256))
+    updatedDatetime = db.Column(db.String(256))
 
-# retrieve company account REMOVE LATER
+# retrieve company account
 @app.route("/companyaccount", methods=["POST"])
 def retrieve_companyaccount():
     companyId = request.json["companyId"]
@@ -90,7 +89,7 @@ def retrieve_companyaccount():
         "updatedDatetime": companyaccount.updatedDatetime
     }) 
 
-# outstanding request databse REMOVE LATER
+# outstanding request databse
 class OutstandingRequest(db.Model):
     __tablename__ = "outstandingrequest"
     id = db.Column(db.String(256), primary_key=True, unique=True)
@@ -104,7 +103,7 @@ class OutstandingRequest(db.Model):
     createdDatetime = db.Column(db.String(256))
     updatedDatetime = db.Column(db.String(256))
 
-# retrieve outstanding request REMOVE LATER
+# retrieve outstanding request
 @app.route("/outstandingrequest", methods=["POST"])
 def outstandingrequest():
     id = request.json["id"]
@@ -127,31 +126,75 @@ def outstandingrequest():
 @app.route("/trades", methods=["GET"])
 def trades():
     
-    # Perform join query
+    # perform join query
     results = db.session.query(
         OutstandingRequest.id,
         OutstandingRequest.carbonUnitPrice,
         OutstandingRequest.carbonQuantity,
+        OutstandingRequest.requestType,
         OutstandingRequest.createdDatetime,
         OutstandingRequest.updatedDatetime,
         CompanyAccount.companyName
     ).join(CompanyAccount, OutstandingRequest.companyId == CompanyAccount.companyId).all()
 
-    # Process results
+    # process results
     data = [
         {
             "id": result.id,
-            "carbonUnitPrice": result.carbonUnitPrice,
             "companyName": result.companyName,
+            "carbonUnitPrice": result.carbonUnitPrice,
             "carbonQuantity": result.carbonQuantity,
+            "requestType": result.requestType,
             "createdDatetime": result.createdDatetime,
             "updatedDatetime": result.updatedDatetime
         }
         for result in results
     ]
     
-    # Return the joined data
+    # return all trades
     return jsonify(data), 200
+
+# retrieve company trade request
+@app.route("/companytraderequest", methods=["POST"])
+def companytraderequest():
+    # extract request data
+    companyId = request.json["companyId"]
+    
+    # perform join query
+    result = db.session.query(
+        OutstandingRequest.id,
+        OutstandingRequest.companyId,
+        OutstandingRequest.requestorCompanyId,
+        OutstandingRequest.carbonUnitPrice,
+        OutstandingRequest.carbonQuantity,
+        OutstandingRequest.requestReason,
+        OutstandingRequest.requestStatus,
+        OutstandingRequest.requestType,
+        OutstandingRequest.createdDatetime,
+        OutstandingRequest.updatedDatetime,
+        CompanyAccount.companyName
+    ).join(CompanyAccount, OutstandingRequest.companyId == CompanyAccount.companyId).filter(
+        OutstandingRequest.companyId == companyId
+    ).first()
+
+    # handle cases where no result is found
+    if result is None:
+        return jsonify({"error": "No data found"}), 404
+    
+    # return company trade request
+    return jsonify({
+        "id": result.id,
+        "companyName": result.companyName,
+        "companyId": result.companyId,
+        "requestorCompanyId": result.requestorCompanyId,
+        "carbonUnitPrice": result.carbonUnitPrice,
+        "carbonQuantity": result.carbonQuantity,
+        "requestReason": result.requestReason,
+        "requestStatus": result.requestStatus,
+        "requestType": result.requestType,
+        "createdDatetime": result.createdDatetime,
+        "updatedDatetime": result.updatedDatetime
+    })
 
 # JWT version
 @app.route("/@me", methods=["POST"])
