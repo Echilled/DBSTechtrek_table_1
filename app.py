@@ -48,6 +48,33 @@ def test_database():
     }) 
 
 
+class CompanyAccount(db.Model):
+    __tablename__ = "companyaccount"
+    companyId = db.Column(db.String(256), primary_key=True, unique=True)
+    companyName = db.Column(db.String(256), unique=True)
+    activeAccount = db.Column(db.String(256))
+    carbonBalance = db.Column(db.String(256))
+    cashBalance = db.Column(db.String(256))
+    createdDatetime = db.Column(db.String(256))
+    updatedDatetime = db.Column(db.String(256))
+
+# retrieve company account
+@app.route("/companyaccount", methods=["POST"])
+def retrieve_companyaccount():
+    companyId = request.json["companyId"]
+    companyaccount = CompanyAccount.query.filter_by(companyId=companyId).first()
+
+    return jsonify({
+        "companyId": companyaccount.companyId,
+        "companyName": companyaccount.companyName,
+        "activeAccount": companyaccount.activeAccount,
+        "carbonBalance": companyaccount.carbonBalance,
+        "cashBalance": companyaccount.cashBalance,
+        "createdDatetime": companyaccount.createdDatetime,
+        "updatedDatetime": companyaccount.updatedDatetime
+    }) 
+
+
 
 # JWT version
 @app.route("/@me")
