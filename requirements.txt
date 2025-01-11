@@ -8,3 +8,4 @@ flask-cors
 flask-bcrypt 
 Flask-JWT-Extended
 mysqlclient 
+mysql-connector-python-rf

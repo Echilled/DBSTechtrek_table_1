@@ -9,13 +9,14 @@ class ApplicationConfig:
     USER_NAME = os.environ["USER_NAME"]
     PASS_WORD = os.environ["PASS_WORD"]
     HOST = os.environ["HOST"]
+    PORT = os.environ["PORT"]
     DB_NAME = os.environ["DB_NAME"]
     JWT_SECRET_KEY = os.environ["JWT_SECRET"]
     
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ECHO = True
-    SQLALCHEMY_DATABASE_URI = r"mysql://" + USER_NAME + ":" + PASS_WORD + "@" + HOST + "/" + DB_NAME
+    SQLALCHEMY_DATABASE_URI = r"mysql://" + USER_NAME + ":" + PASS_WORD + "@" + HOST +":" + PORT+ "/" + DB_NAME
 
     # Login Session
     SESSION_TYPE = "redis"
