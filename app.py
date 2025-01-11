@@ -49,6 +49,16 @@ class User(db.Model):
     email = db.Column(db.String(255), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
 
+# company account databse REMOVE LATER
+class CompanyAccount(db.Model):
+    __tablename__ = "companyaccount"
+    companyId = db.Column(db.String(256), primary_key=True, unique=True)
+    companyName = db.Column(db.String(256), unique=True)
+    activeAccount = db.Column(db.String(256))
+    carbonBalance = db.Column(db.String(256))
+    cashBalance = db.Column(db.String(256))
+    createdDatetime = db.Column(db.String(256))
+    updatedDatetime = db.Column(db.String(256))
 
 # retrieve test database REMOVE LATER
 @app.route("/testDatabase", methods=["POST"])
@@ -61,16 +71,6 @@ def test_database():
         "companyID": user.companyID,
     }) 
 
-# company account databse REMOVE LATER
-class CompanyAccount(db.Model):
-    __tablename__ = "companyaccount"
-    companyId = db.Column(db.String(256), primary_key=True, unique=True)
-    companyName = db.Column(db.String(256), unique=True)
-    activeAccount = db.Column(db.String(256))
-    carbonBalance = db.Column(db.String(256))
-    cashBalance = db.Column(db.String(256))
-    createdDatetime = db.Column(db.String(256))
-    updatedDatetime = db.Column(db.String(256))
 
 # retrieve company account REMOVE LATER
 @app.route("/companyaccount", methods=["POST"])
@@ -122,7 +122,8 @@ def outstandingrequest():
     }) 
 
 # JWT version
-@app.route("/@me")
+@app.route("/@me", methods=["POST"])
+@jwt_required() 
 def get_current_user():
 
     user_id = get_jwt_identity()
@@ -169,19 +170,6 @@ def register_user():
     
     hashed_password = str(bcrypt.generate_password_hash(password).decode('utf-8'))
 
-    #  # Insert into the database
-    # conn = get_db_connection()
-    # cursor = conn.cursor()
-    # try:
-    #     cursor.execute("INSERT INTO users (email, password) VALUES (%s, %s)", (email, hashed_password))
-    #     conn.commit()
-    # except mysql.connector.errors.IntegrityError:
-    #     return jsonify({"error": "Email already exists"}), 409
-    # finally:
-    #     cursor.close()
-    #     conn.close()
-
-    # hashed_password = bcrypt.generate_password_hash(password)
     new_user = User(companyID = companyID, email=email, password=hashed_password)
     db.session.add(new_user)
     db.session.commit()
