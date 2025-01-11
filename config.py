@@ -6,8 +6,8 @@ load_dotenv()
 
 class ApplicationConfig:
     SECRET_KEY = os.environ["SECRET_KEY"]
-    USER_NAME = os.environ["USERNAME"]
-    PASS_WORD = os.environ["PASSWORD"]
+    USER_NAME = os.environ["USER_NAME"]
+    PASS_WORD = os.environ["PASS_WORD"]
     HOST = os.environ["HOST"]
     DB_NAME = os.environ["DB_NAME"]
     

@@ -4,7 +4,8 @@ from flask_bcrypt import Bcrypt
 from flask_cors import CORS, cross_origin
 from flask_session import Session
 from config import ApplicationConfig
-from models import db, User
+# from models import db, User
+from uuid import uuid4
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, get_jwt
 
 app = Flask(__name__)
@@ -23,9 +24,20 @@ db = SQLAlchemy(app)
 with app.app_context():
     db.create_all()
 
+# ---------------------------- Models (to be transfered to another file later) -------------------------------
+def get_uuid():
+    return uuid4().hex
+
+class User(db.Model):
+    __tablename__ = "users"
+    email = db.Column(db.String(345), unique=True)
+    companyid = db.Column(db.Strng(300), unique=True)
+    password = db.Column(db.Text, nullable=False)
+
 
 # Test databse REMOVE LATER
 @app.route("/testDatabase")
+def test_database():
     email = request.json["email"]
     user_exists = User.query.filter_by(email=email).first() is not None
 
@@ -38,7 +50,6 @@ with app.app_context():
 def get_current_user():
 
     user_id = get_jwt_identity()
-    
     
     if not user_id:
         return jsonify({"error": "Unauthorized"}), 401
@@ -107,8 +118,6 @@ def login_user():
         return jsonify({'message': 'Login Success', 'access_token': access_token})
     else:
         return jsonify({'message': 'Login Failed'}), 401
-
-    session["user_id"] = user.id
 
     # auto return a cookie too
     return jsonify({
