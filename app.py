@@ -118,7 +118,7 @@ def login_user():
         return jsonify({"error": "Unauthorized"}), 401
 
     if user and bcrypt.check_password_hash(user.password, password):
-        access_token = create_access_token(identity=user.id)
+        access_token = create_access_token(identity=user.companyID)
         return jsonify({'message': 'Login Success', 'access_token': access_token})
     else:
         return jsonify({'message': 'Login Failed'}), 401
