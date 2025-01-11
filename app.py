@@ -4,12 +4,13 @@ from flask_bcrypt import Bcrypt
 from flask_cors import CORS, cross_origin
 from flask_session import Session
 from config import ApplicationConfig
-# from models import db, User
+# from models import db, User, Books
 from uuid import uuid4
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, get_jwt
 import mysql.connector
 import os
 from dotenv import load_dotenv
+from auth_middleware import token_required
 
 load_dotenv()
 
@@ -23,11 +24,13 @@ server_session = Session(app) #only if the server-sided session is enabled
 
 
 SECRET_KEY = os.environ["SECRET_KEY"]
+app.config['SECRET_KEY'] = SECRET_KEY
 USER_NAME = os.environ["USER_NAME"]
 PASS_WORD = os.environ["PASS_WORD"]
 HOST= os.environ["HOST"]
 DB_NAME = os.environ["DB_NAME"]
 JWT_SECRET_KEY = os.environ["JWT_SECRET"]
+JWT_TOKEN_LCOATION = ['headers']
 
 jwt = JWTManager(app)
 
@@ -123,22 +126,22 @@ def outstandingrequest():
 
 # JWT version
 @app.route("/@me", methods=["POST"])
-@jwt_required() 
-def get_current_user():
+#def get_current_user(current_user):
+   # return jsonify(current_user)
 
-    user_id = get_jwt_identity()
+    # user_id = get_jwt_identity()
     
-    if not user_id:
-        return jsonify({"error": "Unauthorized"}), 401
+    # if not user_id:
+    #     return jsonify({"error123": "it is jumping here directly"}), 401
 
 
-    user = User.query.filter_by(id=user_id).first()
+    # user = User.query.filter_by(id=user_id).first()
     
-    return jsonify({
-        "name": user.name,
-        "id": user.id,
-        "email": user.email
-    }) 
+    # return jsonify({
+    #     "name": user.name,
+    #     "id": user.id,
+    #     "email": user.email
+    # }) 
 
 # Server-side version
 # @app.route("/@me")
