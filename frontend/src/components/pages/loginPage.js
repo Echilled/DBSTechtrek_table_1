@@ -1,25 +1,25 @@
 import React from "react";
-// import InputTextBuilder from "../components/ui/InputTextBuilder";
-// import ToggleSwitch from "../components/ui/ToggleSwitch";
+import InputTextBuilder from "../layout/InputTextBuilder";
+import ToggleSwitch from "../layout/ToggleSwitch";
 // import ButtonBuilder from "../components/ui/ButtonBuilder";
 // import { FcGoogle } from "react-icons/fc";
-// import styled from "styled-components";
+import styled from "styled-components";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-// import {
-//   TextBetweenLine,
-//   Text,
-//   LinkText,
-// } from "../components/ui/text-variations";
-// import ErrorIcon from "@mui/icons-material/Error";
+import {
+  TextBetweenLine,
+  Text,
+  LinkText,
+} from "../layout/text-variations";
+import ErrorIcon from "@mui/icons-material/Error";
 
 const Login = () => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   /* API get: current user */
-  // const getCurrentUser = () => {
-  //   return localStorage.getItem("username");
-  // };
+  const getCurrentUser = () => {
+    return localStorage.getItem("username");
+  };
 
   /* API post: login */
   // const login = (email, password) => {
@@ -62,16 +62,15 @@ const Login = () => {
   // };
 
   /* send user to landing page upon successful login */
-  useEffect(() => {
-    if (getCurrentUser() !== null) {
-      navigate("/");
-    }
-  }, []);
+  // useEffect(() => {
+  //   if (getCurrentUser() !== null) {
+  //     navigate(-1);
+  //   }
+  // }, []);
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
-
   const [formValidation, setFormValidation] = useState({
     isInvalid: false,
     message: [],
@@ -89,28 +88,99 @@ const Login = () => {
     setRemember(event.target.checked);
   };
 
-  const handleLogin = () => {
-    if (username === "" || password === "") {
-      setFormValidation({
-        isInvalid: true,
-        message: ["Fill up all the fields"],
-      });
-    } else {
-      login(username, password)
-        .then(() => {
-          navigate("/");
-        })
-        .catch((error) => {
-          setFormValidation({ isInvalid: true, message: error });
-        });
-    }
-  };
+  // const handleLogin = () => {
+  //   if (username === "" || password === "") {
+  //     setFormValidation({
+  //       isInvalid: true,
+  //       message: ["Fill up all the fields"],
+  //     });
+  //   } else {
+  //     login(username, password)
+  //       .then(() => {
+  //         navigate("/");
+  //       })
+  //       .catch((error) => {
+  //         setFormValidation({ isInvalid: true, message: error });
+  //       });
+  //   }
+  // };
 
   return (
-    <div>
-      
-    </div>
+    <OuterContainer>
+      <InnerContainer>
+        {formValidation.isInvalid ? (
+          <LoginErrorValidationContainer>
+            <ErrorIcon />
+            <Text color="red">
+              {formValidation.message.map((msg) => (
+                <p key={msg}>{msg}</p>
+              ))}
+            </Text>
+          </LoginErrorValidationContainer>
+        ) : null}
+        <InputTextBuilder
+          type="text"
+          name="username"
+          label="Email Address"
+          placeholder="Type your email address"
+          value={username}
+          onChange={handleUsernameChange}
+          required="required"
+        />
+        <InputTextBuilder
+          label="Password"
+          type="password"
+          name="password"
+          placeholder="Enter at least 6 characters"
+          value={password}
+          onChange={handlePasswordChange}
+          required="required"
+        />
+        <ToggleSwitch
+          label="Remember me"
+          labelTextColor="rgba(208, 208, 208)"
+          labelFontSize={12}
+          switchColor="rgba(255, 175, 101, 1)"
+          checked={remember}
+          onChange={handleSwitchChange}
+        />
+      </InnerContainer>
+    </OuterContainer>
   )
 }
+
+const OuterContainer = styled.div`
+  /* used to centralise*/
+  margin: 70px auto;
+
+  /* can be extracted as props in the future */
+  width: 560px;
+  height: 720px;
+  background: #002029;
+
+  /* can be abstraacted as seperate component that extends this*/
+  display: grid;
+  grid-template-rows: 2fr 3fr 1fr 2fr 1fr;
+  justify-items: center;
+  align-items: center;
+`;
+
+const InnerContainer = styled.div`
+  width: 80%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+`;
+
+const LoginErrorValidationContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background-color: #fbe9e9;
+  color: red;
+`;
+
 
 export default Login
