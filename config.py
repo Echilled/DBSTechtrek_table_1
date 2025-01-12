@@ -12,6 +12,7 @@ class ApplicationConfig:
     PORT = os.environ["PORT"]
     DB_NAME = os.environ["DB_NAME"]
     JWT_SECRET_KEY = os.environ["JWT_SECRET"]
+    JWT_TOKEN_LOCATION = ['headers']
     
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
